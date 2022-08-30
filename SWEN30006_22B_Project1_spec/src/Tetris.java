@@ -74,7 +74,7 @@ public class Tetris extends JFrame implements GGActListener {
 
         blockActionIndex++;
         Actor t = null;
-        int rnd = random.nextInt(7);
+        int rnd = random.nextInt(10);
         switch (rnd) {
             case 0:
                 t = new I(this);
@@ -139,6 +139,33 @@ public class Tetris extends JFrame implements GGActListener {
                 Z previewZ = new Z(this);
                 previewZ.display(gameGrid2, new Location(2, 1));
                 blockPreview = previewZ;
+                break;
+            case 7:
+                t = new P(this);
+                if (isAuto) {
+                    ((P) t).setAutoBlockMove(currentBlockMove);
+                }
+                P previewP = new P(this);
+                previewP.display(gameGrid2, new Location(2, 1));
+                blockPreview = previewP;
+                break;
+            case 8:
+                t = new Q(this);
+                if (isAuto) {
+                    ((Q) t).setAutoBlockMove(currentBlockMove);
+                }
+                Q previewQ = new Q(this);
+                previewQ.display(gameGrid2, new Location(2, 1));
+                blockPreview = previewQ;
+                break;
+            case 9:
+                t = new Plus(this);
+                if (isAuto) {
+                    ((Plus) t).setAutoBlockMove(currentBlockMove);
+                }
+                Plus previewPlus = new Plus(this);
+                previewPlus.display(gameGrid2, new Location(2, 1));
+                blockPreview = previewPlus;
                 break;
         }
         // Show preview tetrisBlock
@@ -274,8 +301,62 @@ public class Tetris extends JFrame implements GGActListener {
                 default:
                     return;
             }
+        } else if (currentBlock instanceof P) {
+            switch (keyEvent) {
+                case KeyEvent.VK_UP:
+                    ((P) currentBlock).rotate();
+                    break;
+                case KeyEvent.VK_LEFT:
+                    ((P) currentBlock).left();
+                    break;
+                case KeyEvent.VK_RIGHT:
+                    ((P) currentBlock).right();
+                    break;
+                case KeyEvent.VK_DOWN:
+                    ((P) currentBlock).drop();
+                    break;
+                default:
+                    return;
+            }
+        } else if (currentBlock instanceof Q) {
+            switch (keyEvent) {
+                case KeyEvent.VK_UP:
+                    ((Q) currentBlock).rotate();
+                    break;
+                case KeyEvent.VK_LEFT:
+                    ((Q) currentBlock).left();
+                    break;
+                case KeyEvent.VK_RIGHT:
+                    ((Q) currentBlock).right();
+                    break;
+                case KeyEvent.VK_DOWN:
+                    ((Q) currentBlock).drop();
+                    break;
+                default:
+                    return;
+            }
+        }
+        else if (currentBlock instanceof Plus) {
+            switch (keyEvent) {
+                case KeyEvent.VK_UP:
+                    ((Plus) currentBlock).rotate();
+                    break;
+                case KeyEvent.VK_LEFT:
+                    ((Plus) currentBlock).left();
+                    break;
+                case KeyEvent.VK_RIGHT:
+                    ((Plus) currentBlock).right();
+                    break;
+                case KeyEvent.VK_DOWN:
+                    ((Plus) currentBlock).drop();
+                    break;
+                default:
+                    return;
+            }
         }
     }
+
+
     public void act(){
         removeFilledLine();
         moveBlock(gameGrid1.getKeyCode());
