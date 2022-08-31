@@ -9,7 +9,7 @@ class S extends TetrisShape {
   private static final int blockId = 4;
   private final String blockName = "S";
 
-  S(Tetris tetris) {
+  S(Tetris tetris){
     super();
 
     this.tetris = tetris;
