@@ -19,8 +19,6 @@ public abstract class TetrisShape extends Actor{
     private int autoBlockIndex;
 
 
-
-
     public void setAutoBlockMove(String autoBlockMove) {
         this.autoBlockMove = autoBlockMove;
     }

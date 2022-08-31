@@ -14,7 +14,8 @@ public class Tetris extends JFrame implements GGActListener {
     private Actor currentBlock = null;  // Currently active block
     private Actor blockPreview = null;   // block in preview window
     private int score = 0;
-    private int slowDown = 5;
+    private int baseSlowDown = 5;
+    private int slowDown;
     private Random random = new Random(0);
     private GameMode difficulty;
 
@@ -69,11 +70,11 @@ public class Tetris extends JFrame implements GGActListener {
         J_SHAPE (1),
         L_SHAPE (2),
         O_SHAPE (3),
-        P_SHAPE (7),
-        Q_SHAPE (8),
         S_SHAPE (4),
         T_SHAPE (5),
         Z_SHAPE (6),
+        P_SHAPE (7),
+        Q_SHAPE (8),
         Plus_SHAPE (9);
 
         private final int id;
@@ -116,6 +117,13 @@ public class Tetris extends JFrame implements GGActListener {
         setTitle("SWEN30006 Tetris Madness");
         score = 0;
         showScore(score);
+        switch (difficulty){
+            case MEDIUM:
+                slowDown = (int)(0.8*baseSlowDown);
+                break;
+            default:
+                slowDown = baseSlowDown;
+        }
     }
 
     // create a block and assign to a preview mode
@@ -140,6 +148,7 @@ public class Tetris extends JFrame implements GGActListener {
                 break;
             default:
                 rnd = random.nextInt(7);
+                break;
         }
         // Spawn random piece
         Shape s = Shape.findShape(rnd);
@@ -238,7 +247,18 @@ public class Tetris extends JFrame implements GGActListener {
         }
         // Show preview tetrisBlock
 
-        t.setSlowDown(slowDown);
+        // Set speed with respect to difficulty
+        switch (difficulty){
+            case MEDIUM:
+                t.setSlowDown((int)(0.8*slowDown));
+                break;
+            case MADNESS:
+                int rand = slowDown - random.nextInt(slowDown+1);
+                t.setSlowDown(rand);
+                break;
+            default:
+                t.setSlowDown(slowDown);
+        }
         return t;
     }
 
@@ -254,10 +274,11 @@ public class Tetris extends JFrame implements GGActListener {
     // Handle user input to move block. Arrow left to move left, Arrow right to move right, Arrow up to rotate and
     // Arrow down for going down
     private void moveBlock(int keyEvent) {
-
         switch (keyEvent) {
                 case KeyEvent.VK_UP:
-                    ((TetrisShape) currentBlock).rotate();
+                    if (difficulty != GameMode.MADNESS) {
+                        ((TetrisShape) currentBlock).rotate();
+                    }
                     break;
                 case KeyEvent.VK_LEFT:
                     ((TetrisShape) currentBlock).left();
@@ -306,16 +327,19 @@ public class Tetris extends JFrame implements GGActListener {
                 gameCallback.changeOfScore(score);
                 showScore(score);
                 // Set speed of tetrisBlocks
-                if (score > 10)
-                    slowDown = 4;
-                if (score > 20)
-                    slowDown = 3;
-                if (score > 30)
-                    slowDown = 2;
-                if (score > 40)
-                    slowDown = 1;
-                if (score > 50)
+                if (score == 11)
+                    slowDown-= 1;
+                if (score == 21)
+                    slowDown-= 1;
+                if (score == 31)
+                    slowDown-= 1;
+                if (score == 41)
+                    slowDown -= 1;
+                if (score == 51)
+                    slowDown -= 1;
+                if (slowDown < 0){
                     slowDown = 0;
+                }
             }
         }
     }
