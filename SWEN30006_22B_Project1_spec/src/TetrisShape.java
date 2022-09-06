@@ -1,5 +1,6 @@
 import ch.aplu.jgamegrid.*;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 
@@ -47,7 +48,13 @@ public abstract class TetrisShape extends Actor{
             if (!advance())
             {
                 if (nb == 0)  // Game is over when tetrisBlock cannot fall down
-                    tetris.gameOver();
+                {
+                    try {
+                        tetris.gameOver();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
                 else
                 {
                     setActEnabled(false);

@@ -2,6 +2,10 @@
 
 import ch.aplu.jgamegrid.*;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.security.Key;
 import java.util.*;
 import java.awt.event.KeyEvent;
@@ -23,11 +27,17 @@ public class Tetris extends JFrame implements GGActListener {
 
     private boolean isAuto = false;
 
+
     private int seed = 30006;
     // For testing mode, the block will be moved automatically based on the blockActions.
     // L is for Left, R is for Right, T is for turning (rotating), and D for down
     private String [] blockActions = new String[10];
     private int blockActionIndex = 0;
+    private int[] shapeCnt = new int[10];
+    private ArrayList<int[]> temp = new ArrayList<>();
+    private int round = 1;
+
+    private int totalScore = 0;
 
     // Initialise object
     private void initWithProperties(Properties properties) {
@@ -117,6 +127,7 @@ public class Tetris extends JFrame implements GGActListener {
         setTitle("SWEN30006 Tetris Madness");
         score = 0;
         showScore(score);
+
         switch (difficulty){
             case MEDIUM:
                 slowDown = (int)(0.8*baseSlowDown);
@@ -162,6 +173,7 @@ public class Tetris extends JFrame implements GGActListener {
                 I previewI = new I(this);
                 previewI.display(gameGrid2, new Location(2, 1));
                 blockPreview = previewI;
+                shapeCnt[Shape.I_SHAPE.ordinal()] += 1;
                 break;
             case J_SHAPE:
                 t = new J(this);
@@ -170,6 +182,7 @@ public class Tetris extends JFrame implements GGActListener {
                 }
                 J previewJ = new J(this);
                 previewJ.display(gameGrid2, new Location(2, 1));
+                shapeCnt[Shape.J_SHAPE.ordinal()] += 1;
                 blockPreview = previewJ;
                 break;
             case L_SHAPE:
@@ -180,6 +193,7 @@ public class Tetris extends JFrame implements GGActListener {
                 L previewL = new L(this);
                 previewL.display(gameGrid2, new Location(2, 1));
                 blockPreview = previewL;
+                shapeCnt[Shape.L_SHAPE.ordinal()] += 1;
                 break;
             case O_SHAPE:
                 t = new O(this);
@@ -189,6 +203,7 @@ public class Tetris extends JFrame implements GGActListener {
                 O previewO = new O(this);
                 previewO.display(gameGrid2, new Location(2, 1));
                 blockPreview = previewO;
+                shapeCnt[Shape.O_SHAPE.ordinal()] += 1;
                 break;
             case S_SHAPE:
                 t = new S(this);
@@ -198,6 +213,7 @@ public class Tetris extends JFrame implements GGActListener {
                 S previewS = new S(this);
                 previewS.display(gameGrid2, new Location(2, 1));
                 blockPreview = previewS;
+                shapeCnt[Shape.S_SHAPE.ordinal()] += 1;
                 break;
             case T_SHAPE:
                 t = new T(this);
@@ -207,6 +223,7 @@ public class Tetris extends JFrame implements GGActListener {
                 T previewT = new T(this);
                 previewT.display(gameGrid2, new Location(2, 1));
                 blockPreview = previewT;
+                shapeCnt[Shape.T_SHAPE.ordinal()] += 1;
                 break;
             case Z_SHAPE:
                 t = new Z(this);
@@ -216,6 +233,7 @@ public class Tetris extends JFrame implements GGActListener {
                 Z previewZ = new Z(this);
                 previewZ.display(gameGrid2, new Location(2, 1));
                 blockPreview = previewZ;
+                shapeCnt[Shape.Z_SHAPE.ordinal()] += 1;
                 break;
             case P_SHAPE:
                 t = new P(this);
@@ -225,6 +243,7 @@ public class Tetris extends JFrame implements GGActListener {
                 P previewP = new P(this);
                 previewP.display(gameGrid2, new Location(2, 1));
                 blockPreview = previewP;
+                shapeCnt[Shape.P_SHAPE.ordinal()] += 1;
                 break;
             case Q_SHAPE:
                 t = new Q(this);
@@ -234,6 +253,7 @@ public class Tetris extends JFrame implements GGActListener {
                 Q previewQ = new Q(this);
                 previewQ.display(gameGrid2, new Location(2, 1));
                 blockPreview = previewQ;
+                shapeCnt[Shape.Q_SHAPE.ordinal()] += 1;
                 break;
             case Plus_SHAPE:
                 t = new Plus(this);
@@ -243,6 +263,7 @@ public class Tetris extends JFrame implements GGActListener {
                 Plus previewPlus = new Plus(this);
                 previewPlus.display(gameGrid2, new Location(2, 1));
                 blockPreview = previewPlus;
+                shapeCnt[Shape.Plus_SHAPE.ordinal()] += 1;
                 break;
         }
         // Show preview tetrisBlock
@@ -275,22 +296,22 @@ public class Tetris extends JFrame implements GGActListener {
     // Arrow down for going down
     private void moveBlock(int keyEvent) {
         switch (keyEvent) {
-                case KeyEvent.VK_UP:
-                    if (difficulty != GameMode.MADNESS) {
-                        ((TetrisShape) currentBlock).rotate();
-                    }
-                    break;
-                case KeyEvent.VK_LEFT:
-                    ((TetrisShape) currentBlock).left();
-                    break;
-                case KeyEvent.VK_RIGHT:
-                    ((TetrisShape) currentBlock).right();
-                    break;
-                case KeyEvent.VK_DOWN:
-                    ((TetrisShape) currentBlock).drop();
-                    break;
-                default:
-                    return;
+            case KeyEvent.VK_UP:
+                if (difficulty != GameMode.MADNESS) {
+                    ((TetrisShape) currentBlock).rotate();
+                }
+                break;
+            case KeyEvent.VK_LEFT:
+                ((TetrisShape) currentBlock).left();
+                break;
+            case KeyEvent.VK_RIGHT:
+                ((TetrisShape) currentBlock).right();
+                break;
+            case KeyEvent.VK_DOWN:
+                ((TetrisShape) currentBlock).drop();
+                break;
+            default:
+                return;
         }
     }
 
@@ -351,12 +372,44 @@ public class Tetris extends JFrame implements GGActListener {
 
     }
 
-    void gameOver() {
+    void gameOver() throws IOException {
         gameGrid1.addActor(new Actor("sprites/gameover.gif"), new Location(5, 5));
         gameGrid1.doPause();
+
+        totalScore += score;
+        temp.add(Arrays.copyOf(shapeCnt, shapeCnt.length));
+        writeFile();
+        Arrays.fill(shapeCnt, 0);
+        round += 1;
+
         if (isAuto) {
+            writeFile();
             System.exit(0);
         }
+    }
+
+    public void writeFile() throws IOException {
+
+        FileWriter fw = new  FileWriter("statistics.txt");
+
+        fw.write("Difficulty: " + (this.difficulty.str).substring(0,1).toUpperCase() + (this.difficulty.str).substring(1) + "\n");
+
+        fw.write("Average score per round: " + (totalScore));
+
+
+
+        for (int i = 0; i < round; i++) {
+            fw.write("\n" + "------------------------------------------");
+            fw.write("\n" + "Round #" + (i+1));
+            fw.write("\n" + "Score: " + score);
+            int difficultyShapes = Objects.equals(difficulty.str, "easy") ? 7 : 10;
+            for (int j = 0; j < difficultyShapes; j++) {
+                fw.write("\n" + Shape.findShape(j).name() + ": " + temp.get(i)[Shape.findShape(j).ordinal()]);
+            }
+        }
+
+        fw.close();
+
     }
 
     // Start a new game
@@ -376,6 +429,7 @@ public class Tetris extends JFrame implements GGActListener {
         score = 0;
         showScore(score);
         slowDown = 5;
+
     }
 
     // Different speed for manual and auto mode
@@ -383,7 +437,7 @@ public class Tetris extends JFrame implements GGActListener {
         if (isAuto) {
             return 10;
         } else {
-            return 100;
+            return 10;
         }
     }
 
