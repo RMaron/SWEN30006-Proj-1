@@ -18,6 +18,7 @@ public class Tetris extends JFrame implements GGActListener {
     private Actor currentBlock = null;  // Currently active block
     private Actor blockPreview = null;   // block in preview window
     private int score = 0;
+    private ArrayList<Integer> scoreList = new ArrayList<>();
     private int baseSlowDown = 5;
     private int slowDown;
     private Random random = new Random(0);
@@ -346,6 +347,7 @@ public class Tetris extends JFrame implements GGActListener {
 
         totalScore += score;
         temp.add(Arrays.copyOf(shapeCnt, shapeCnt.length));
+        scoreList.add((Integer)score);
         writeFile();
         Arrays.fill(shapeCnt, 0);
         round += 1;
@@ -361,14 +363,14 @@ public class Tetris extends JFrame implements GGActListener {
 
         fw.write("Difficulty: " + (this.difficulty.str).substring(0,1).toUpperCase() + (this.difficulty.str).substring(1) + "\n");
 
-        fw.write("Average score per round: " + (totalScore));
+        fw.write("Average score per round: " + (totalScore/(double)round));
 
 
 
         for (int i = 0; i < round; i++) {
             fw.write("\n" + "------------------------------------------");
             fw.write("\n" + "Round #" + (i+1));
-            fw.write("\n" + "Score: " + score);
+            fw.write("\n" + "Score: " + scoreList.get(i));
             int difficultyShapes = Objects.equals(difficulty.str, "easy") ? 7 : 10;
             for (int j = 0; j < difficultyShapes; j++) {
                 fw.write("\n" + Shape.findShape(j).id + ": " + temp.get(i)[Shape.findShape(j).ordinal()]);
@@ -404,7 +406,7 @@ public class Tetris extends JFrame implements GGActListener {
         if (isAuto) {
             return 10;
         } else {
-            return 10;
+            return 50;
         }
     }
 
