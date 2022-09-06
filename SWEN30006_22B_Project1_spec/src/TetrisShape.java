@@ -6,12 +6,13 @@ import java.util.Arrays;
 
 public abstract class TetrisShape extends Actor{
 
-    protected String blockName;
+    protected Tetris.Shape shape;
 
     protected Tetris tetris;
     private boolean isStarting=true;
     private int rotId = 0;
     private int nb=0;
+
 
 
     protected ArrayList<TetroBlock> blocks = new ArrayList<TetroBlock>();
@@ -25,7 +26,7 @@ public abstract class TetrisShape extends Actor{
     }
 
     public String toString() {
-        return "For testing, do not change: Block: " + blockName + ". Location: " + blocks + ". Rotation: " + rotId;
+        return "For testing, do not change: Block: " + shape.getId() + ". Location: " + blocks + ". Rotation: " + rotId;
     }
 
     public void act()
@@ -77,7 +78,9 @@ public abstract class TetrisShape extends Actor{
                 right();
                 break;
             case "T":
-                rotate();
+                if (tetris.getDifficulty() != Tetris.GameMode.MADNESS) {
+                    rotate();
+                }
                 break;
             case "D":
                 drop();
@@ -246,4 +249,9 @@ public abstract class TetrisShape extends Actor{
         for (TetroBlock a : blocks)
             a.removeSelf();
     }
+
+    public Tetris.Shape getShape(){
+        return this.shape;
+    }
+
 }

@@ -76,32 +76,38 @@ public class Tetris extends JFrame implements GGActListener {
 
     // Enum of shapes, value = shape ID
     public enum Shape{
-        I_SHAPE (0),
-        J_SHAPE (1),
-        L_SHAPE (2),
-        O_SHAPE (3),
-        S_SHAPE (4),
-        T_SHAPE (5),
-        Z_SHAPE (6),
-        P_SHAPE (7),
-        Q_SHAPE (8),
-        Plus_SHAPE (9);
+        I_SHAPE ("I"),
+        J_SHAPE ("J"),
+        L_SHAPE ("L"),
+        O_SHAPE ("O"),
+        S_SHAPE ("S"),
+        T_SHAPE ("T"),
+        Z_SHAPE ("Z"),
+        Plus_SHAPE ("+"),
+        P_SHAPE ("P"),
+        Q_SHAPE ("Q");
 
-        private final int id;
 
-        Shape(int id){
+        private final String id;
+
+        Shape( String id){
             this.id = id;
         }
 
         // Find shape from given shape ID
         public static Shape findShape(int i){
             for (Shape s : values()){
-                if (s.id == i){
+                if (s.ordinal() == i){
                     return s;
                 }
             }
             return null;
         }
+
+        public String getId(){
+            return this.id;
+        }
+
     }
 
 
@@ -149,7 +155,8 @@ public class Tetris extends JFrame implements GGActListener {
         }
 
         blockActionIndex++;
-        Actor t = null;
+        TetrisShape t = null;
+        TetrisShape preview = null;
         int rnd;
         // Handles difficulty scaling for number of pieces
         switch (difficulty) {
@@ -166,106 +173,61 @@ public class Tetris extends JFrame implements GGActListener {
         switch (s) {
             case I_SHAPE:
                 t = new I(this);
-                if (isAuto) {
-                    ((I) t).setAutoBlockMove(currentBlockMove);
-                }
+                preview = new I(this);
 
-                I previewI = new I(this);
-                previewI.display(gameGrid2, new Location(2, 1));
-                blockPreview = previewI;
-                shapeCnt[Shape.I_SHAPE.ordinal()] += 1;
                 break;
             case J_SHAPE:
                 t = new J(this);
-                if (isAuto) {
-                    ((J) t).setAutoBlockMove(currentBlockMove);
-                }
-                J previewJ = new J(this);
-                previewJ.display(gameGrid2, new Location(2, 1));
-                shapeCnt[Shape.J_SHAPE.ordinal()] += 1;
-                blockPreview = previewJ;
+                preview = new J(this);
+
                 break;
             case L_SHAPE:
                 t = new L(this);
-                if (isAuto) {
-                    ((L) t).setAutoBlockMove(currentBlockMove);
-                }
-                L previewL = new L(this);
-                previewL.display(gameGrid2, new Location(2, 1));
-                blockPreview = previewL;
-                shapeCnt[Shape.L_SHAPE.ordinal()] += 1;
+                preview = new L(this);
+
                 break;
             case O_SHAPE:
                 t = new O(this);
-                if (isAuto) {
-                    ((O) t).setAutoBlockMove(currentBlockMove);
-                }
-                O previewO = new O(this);
-                previewO.display(gameGrid2, new Location(2, 1));
-                blockPreview = previewO;
-                shapeCnt[Shape.O_SHAPE.ordinal()] += 1;
+                preview = new O(this);
+
                 break;
             case S_SHAPE:
                 t = new S(this);
-                if (isAuto) {
-                    ((S) t).setAutoBlockMove(currentBlockMove);
-                }
-                S previewS = new S(this);
-                previewS.display(gameGrid2, new Location(2, 1));
-                blockPreview = previewS;
-                shapeCnt[Shape.S_SHAPE.ordinal()] += 1;
+                preview = new S(this);
+
                 break;
             case T_SHAPE:
                 t = new T(this);
-                if (isAuto) {
-                    ((T) t).setAutoBlockMove(currentBlockMove);
-                }
-                T previewT = new T(this);
-                previewT.display(gameGrid2, new Location(2, 1));
-                blockPreview = previewT;
-                shapeCnt[Shape.T_SHAPE.ordinal()] += 1;
+                preview = new T(this);
+
                 break;
             case Z_SHAPE:
                 t = new Z(this);
-                if (isAuto) {
-                    ((Z) t).setAutoBlockMove(currentBlockMove);
-                }
-                Z previewZ = new Z(this);
-                previewZ.display(gameGrid2, new Location(2, 1));
-                blockPreview = previewZ;
-                shapeCnt[Shape.Z_SHAPE.ordinal()] += 1;
+                preview = new Z(this);
+
                 break;
             case P_SHAPE:
                 t = new P(this);
-                if (isAuto) {
-                    ((P) t).setAutoBlockMove(currentBlockMove);
-                }
-                P previewP = new P(this);
-                previewP.display(gameGrid2, new Location(2, 1));
-                blockPreview = previewP;
-                shapeCnt[Shape.P_SHAPE.ordinal()] += 1;
+                preview = new P(this);
+
                 break;
             case Q_SHAPE:
                 t = new Q(this);
-                if (isAuto) {
-                    ((Q) t).setAutoBlockMove(currentBlockMove);
-                }
-                Q previewQ = new Q(this);
-                previewQ.display(gameGrid2, new Location(2, 1));
-                blockPreview = previewQ;
-                shapeCnt[Shape.Q_SHAPE.ordinal()] += 1;
+                preview = new Q(this);
+
                 break;
             case Plus_SHAPE:
                 t = new Plus(this);
-                if (isAuto) {
-                    ((Plus) t).setAutoBlockMove(currentBlockMove);
-                }
-                Plus previewPlus = new Plus(this);
-                previewPlus.display(gameGrid2, new Location(2, 1));
-                blockPreview = previewPlus;
-                shapeCnt[Shape.Plus_SHAPE.ordinal()] += 1;
+                preview = new Plus(this);
+
                 break;
         }
+        if (isAuto) {
+            t.setAutoBlockMove(currentBlockMove);
+        }
+        preview.display(gameGrid2, new Location(2, 1));
+        blockPreview = preview;
+        shapeCnt[preview.getShape().ordinal()] += 1;
         // Show preview tetrisBlock
 
         // Set speed with respect to difficulty
@@ -344,20 +306,26 @@ public class Tetris extends JFrame implements GGActListener {
                         a.setY(z + 1);
                 }
                 gameGrid1.refresh();
+                int prevScore = score;
                 score++;
                 gameCallback.changeOfScore(score);
                 showScore(score);
                 // Set speed of tetrisBlocks
-                if (score == 11)
-                    slowDown-= 1;
-                if (score == 21)
-                    slowDown-= 1;
-                if (score == 31)
-                    slowDown-= 1;
-                if (score == 41)
+                if (prevScore <=10 && score > 10) {
                     slowDown -= 1;
-                if (score == 51)
+                }
+                if (prevScore <=20 && score > 20) {
                     slowDown -= 1;
+                }
+                if (prevScore <=30 && score > 30) {
+                    slowDown -= 1;
+                }
+                if (prevScore <=40 && score > 40) {
+                    slowDown -= 1;
+                }
+                if (prevScore <=50 && score > 50) {
+                    slowDown -= 1;
+                }
                 if (slowDown < 0){
                     slowDown = 0;
                 }
@@ -383,7 +351,6 @@ public class Tetris extends JFrame implements GGActListener {
         round += 1;
 
         if (isAuto) {
-            writeFile();
             System.exit(0);
         }
     }
@@ -404,7 +371,7 @@ public class Tetris extends JFrame implements GGActListener {
             fw.write("\n" + "Score: " + score);
             int difficultyShapes = Objects.equals(difficulty.str, "easy") ? 7 : 10;
             for (int j = 0; j < difficultyShapes; j++) {
-                fw.write("\n" + Shape.findShape(j).name() + ": " + temp.get(i)[Shape.findShape(j).ordinal()]);
+                fw.write("\n" + Shape.findShape(j).id + ": " + temp.get(i)[Shape.findShape(j).ordinal()]);
             }
         }
 
@@ -462,5 +429,9 @@ public class Tetris extends JFrame implements GGActListener {
     public javax.swing.JButton startBtn;
     private TetrisComponents tetrisComponents;
     // End of variables declaration//GEN-END:variables
+
+    public GameMode getDifficulty(){
+        return this.difficulty;
+    }
 
 }

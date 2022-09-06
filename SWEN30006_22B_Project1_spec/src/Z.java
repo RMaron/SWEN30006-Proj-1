@@ -6,12 +6,13 @@ import java.util.ArrayList;
 
 
 class Z extends TetrisShape {
-  private static final int blockId = 6;
-  private final String blockName = "Z";
+  private static final Tetris.Shape s = Tetris.Shape.Z_SHAPE;
+
 
   Z(Tetris tetris) {
     super();
 
+    this.shape = s;
     this.tetris = tetris;
     // rotId 0
     Location[][] r = new Location[4][4];
@@ -36,7 +37,7 @@ class Z extends TetrisShape {
     r[3][3] = new Location(new Location(1, -1));
 
     for (int i = 0; i < r.length; i++) {
-      blocks.add(new TetroBlock(blockId, r[i]));
+      blocks.add(new TetroBlock(this.shape.ordinal(), r[i]));
     }
   }
 }
