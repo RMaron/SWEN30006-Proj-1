@@ -17,8 +17,6 @@ public class Tetris extends JFrame implements GGActListener {
 
     private Actor currentBlock = null;  // Currently active block
     private Actor blockPreview = null;   // block in preview window
-    private int score = 0;
-    private ArrayList<Integer> scoreList = new ArrayList<>();
     private int baseSlowDown = 5;
     private int slowDown;
     private Random random = new Random(0);
@@ -27,6 +25,7 @@ public class Tetris extends JFrame implements GGActListener {
     private TetrisGameCallback gameCallback;
 
     private boolean isAuto = false;
+    private GameStatistics gameStatistics;
 
 
     private int seed = 30006;
@@ -34,11 +33,7 @@ public class Tetris extends JFrame implements GGActListener {
     // L is for Left, R is for Right, T is for turning (rotating), and D for down
     private String [] blockActions = new String[10];
     private int blockActionIndex = 0;
-    private int[] shapeCnt = new int[10];
-    private ArrayList<int[]> temp = new ArrayList<>();
-    private int round = 1;
 
-    private int totalScore = 0;
 
     // Initialise object
     private void initWithProperties(Properties properties) {
@@ -124,6 +119,7 @@ public class Tetris extends JFrame implements GGActListener {
         gameGrid1.addActListener(this);
         gameGrid1.setSimulationPeriod(getSimulationTime());
 
+        this.gameStatistics = new GameStatistics(this);
         // Add the first block to start
         currentBlock = createRandomTetrisBlock();
         gameGrid1.addActor(currentBlock, new Location(6, 0));
@@ -132,8 +128,8 @@ public class Tetris extends JFrame implements GGActListener {
         // Do not lose keyboard focus when clicking this window
         gameGrid2.setFocusable(false);
         setTitle("SWEN30006 Tetris Madness");
-        score = 0;
-        showScore(score);
+
+        showScore(gameStatistics.getScore());
 
         switch (difficulty){
             case MEDIUM:
@@ -228,7 +224,7 @@ public class Tetris extends JFrame implements GGActListener {
         }
         preview.display(gameGrid2, new Location(2, 1));
         blockPreview = preview;
-        shapeCnt[preview.getShape().ordinal()] += 1;
+        gameStatistics.addShapeCnt(preview.getShape().ordinal());
         // Show preview tetrisBlock
 
         // Set speed with respect to difficulty
@@ -307,24 +303,24 @@ public class Tetris extends JFrame implements GGActListener {
                         a.setY(z + 1);
                 }
                 gameGrid1.refresh();
-                int prevScore = score;
-                score++;
-                gameCallback.changeOfScore(score);
-                showScore(score);
+                int prevScore = gameStatistics.getScore();
+                gameStatistics.addScore(1);
+                gameCallback.changeOfScore(gameStatistics.getScore());
+                showScore(gameStatistics.getScore());
                 // Set speed of tetrisBlocks
-                if (prevScore <=10 && score > 10) {
+                if (prevScore <=10 && gameStatistics.getScore() > 10) {
                     slowDown -= 1;
                 }
-                if (prevScore <=20 && score > 20) {
+                if (prevScore <=20 && gameStatistics.getScore() > 20) {
                     slowDown -= 1;
                 }
-                if (prevScore <=30 && score > 30) {
+                if (prevScore <=30 && gameStatistics.getScore() > 30) {
                     slowDown -= 1;
                 }
-                if (prevScore <=40 && score > 40) {
+                if (prevScore <=40 && gameStatistics.getScore() > 40) {
                     slowDown -= 1;
                 }
-                if (prevScore <=50 && score > 50) {
+                if (prevScore <=50 && gameStatistics.getScore() > 50) {
                     slowDown -= 1;
                 }
                 if (slowDown < 0){
@@ -338,48 +334,19 @@ public class Tetris extends JFrame implements GGActListener {
 
     private void showScore(final int score) {
         EventQueue.invokeLater(() -> scoreText.setText(score + " points"));
-
     }
 
     void gameOver() throws IOException {
         gameGrid1.addActor(new Actor("sprites/gameover.gif"), new Location(5, 5));
         gameGrid1.doPause();
 
-        totalScore += score;
-        temp.add(Arrays.copyOf(shapeCnt, shapeCnt.length));
-        scoreList.add((Integer)score);
-        writeFile();
-        Arrays.fill(shapeCnt, 0);
-        round += 1;
+        gameStatistics.roundUpdate();
 
         if (isAuto) {
             System.exit(0);
         }
     }
 
-    public void writeFile() throws IOException {
-
-        FileWriter fw = new  FileWriter("statistics.txt");
-
-        fw.write("Difficulty: " + (this.difficulty.str).substring(0,1).toUpperCase() + (this.difficulty.str).substring(1) + "\n");
-
-        fw.write("Average score per round: " + (totalScore/(double)round));
-
-
-
-        for (int i = 0; i < round; i++) {
-            fw.write("\n" + "------------------------------------------");
-            fw.write("\n" + "Round #" + (i+1));
-            fw.write("\n" + "Score: " + scoreList.get(i));
-            int difficultyShapes = Objects.equals(difficulty.str, "easy") ? 7 : 10;
-            for (int j = 0; j < difficultyShapes; j++) {
-                fw.write("\n" + Shape.findShape(j).id + ": " + temp.get(i)[Shape.findShape(j).ordinal()]);
-            }
-        }
-
-        fw.close();
-
-    }
 
     // Start a new game
     public void startBtnActionPerformed(java.awt.event.ActionEvent evt)
@@ -395,8 +362,7 @@ public class Tetris extends JFrame implements GGActListener {
         gameGrid1.addActor(currentBlock, new Location(6, 0));
         gameGrid1.doRun();
         gameGrid1.requestFocus();
-        score = 0;
-        showScore(score);
+        showScore(gameStatistics.getScore());
         slowDown = 5;
 
     }
@@ -406,7 +372,7 @@ public class Tetris extends JFrame implements GGActListener {
         if (isAuto) {
             return 10;
         } else {
-            return 50;
+            return 100;
         }
     }
 
@@ -431,6 +397,10 @@ public class Tetris extends JFrame implements GGActListener {
     public javax.swing.JButton startBtn;
     private TetrisComponents tetrisComponents;
     // End of variables declaration//GEN-END:variables
+
+    public String getDifficultyStr(){
+        return this.difficulty.str;
+    }
 
     public GameMode getDifficulty(){
         return this.difficulty;
