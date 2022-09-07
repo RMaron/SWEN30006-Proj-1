@@ -6,24 +6,25 @@ import java.util.Arrays;
 
 public abstract class TetrisShape extends Actor{
 
-    protected Tetris.Shape shape;
+    private Tetris.Shape shape;
 
-    protected Tetris tetris;
+    private Tetris tetris;
     private boolean isStarting=true;
     private int rotId = 0;
     private int nb=0;
 
 
 
-    protected ArrayList<TetroBlock> blocks = new ArrayList<TetroBlock>();
+    private ArrayList<TetroBlock> blocks = new ArrayList<TetroBlock>();
     private Actor nextTetrisBlock;
-    private String autoBlockMove;
-    private int autoBlockIndex;
 
-
-    public void setAutoBlockMove(String autoBlockMove) {
-        this.autoBlockMove = autoBlockMove;
+    TetrisShape(Tetris tetris, Tetris.Shape shape){
+        this.tetris = tetris;
+        this.shape = shape;
     }
+
+
+
 
     public String toString() {
         return "For testing, do not change: Block: " + shape.getId() + ". Location: " + blocks + ". Rotation: " + rotId;
@@ -39,8 +40,8 @@ public abstract class TetrisShape extends Actor{
             }
             isStarting = false;
             nb = 0;
-        } else if (nb >= blocks.size() && canAutoPlay()) {
-            autoMove();
+        } if (nb >= blocks.size() && (this.tetris.getGameMover().canAutoPlay())) {
+            this.tetris.getGameMover().moveBlock(this, ((AutoMover)this.tetris.getGameMover()).currentAutoMove());
         } else
         {
             setDirection(90);
@@ -67,40 +68,7 @@ public abstract class TetrisShape extends Actor{
         }
     }
 
-    // Based on the input in the properties file, the block can move automatically
-    private void autoMove() {
-        String moveString = autoBlockMove.substring(autoBlockIndex, autoBlockIndex + 1);
-        switch (moveString) {
-            case "L":
-                left();
-                break;
-            case "R":
-                right();
-                break;
-            case "T":
-                if (tetris.getDifficulty() != Tetris.GameMode.MADNESS) {
-                    rotate();
-                }
-                break;
-            case "D":
-                drop();
-                break;
-        }
-        autoBlockIndex++;
-    }
 
-    // Check if the block can be played automatically based on the properties file
-    private boolean canAutoPlay() {
-        if (autoBlockMove != null && !autoBlockMove.equals("")) {
-            if (autoBlockMove.length() > autoBlockIndex) {
-                return true;
-            } else {
-                return false;
-            }
-        } else {
-            return false;
-        }
-    }
 
     void display(GameGrid gg, Location location)
     {
@@ -179,7 +147,7 @@ public abstract class TetrisShape extends Actor{
     }
 
     // Logic to check if the block has been removed (as winning a line) or drop to the bottom
-    private boolean advance() {
+    public boolean advance() {
         boolean canMove = false;
         for (TetroBlock a : blocks) {
             if (!a.isRemoved()) {
@@ -252,6 +220,18 @@ public abstract class TetrisShape extends Actor{
 
     public Tetris.Shape getShape(){
         return this.shape;
+    }
+
+    public Tetris getTetris(){
+        return this.tetris;
+    }
+
+    public void addBlocks(TetroBlock tb){
+        this.blocks.add(tb);
+    }
+
+    public boolean getIsStarting(){
+        return this.isStarting;
     }
 
 }

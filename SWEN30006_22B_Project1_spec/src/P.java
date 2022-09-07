@@ -10,11 +10,8 @@ class P extends TetrisShape {
 
 
     P(Tetris tetris) {
-        super();
+        super(tetris, s);
 
-
-        this.shape = s;
-        this.tetris = tetris;
         Location[][] r = new Location[5][4];
         // rotId 0
         r[0][0] = new Location(new Location(1, 0));
@@ -42,7 +39,7 @@ class P extends TetrisShape {
         r[4][3] = new Location(new Location(-1, 0));
 
         for (int i = 0; i < r.length; i++)
-            blocks.add(new TetroBlock(this.shape.ordinal(), r[i]));
+            this.addBlocks(new TetroBlock(this.getShape().ordinal(), r[i]));
     }
 
 }

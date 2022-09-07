@@ -17,10 +17,11 @@ public class Tetris extends JFrame implements GGActListener {
 
     private Actor currentBlock = null;  // Currently active block
     private Actor blockPreview = null;   // block in preview window
-    private int baseSlowDown = 5;
+    private static final int baseSlowDown = 5;
     private int slowDown;
     private Random random = new Random(0);
     private GameMode difficulty;
+    private GameMover gameMover;
 
     private TetrisGameCallback gameCallback;
 
@@ -32,7 +33,6 @@ public class Tetris extends JFrame implements GGActListener {
     // For testing mode, the block will be moved automatically based on the blockActions.
     // L is for Left, R is for Right, T is for turning (rotating), and D for down
     private String [] blockActions = new String[10];
-    private int blockActionIndex = 0;
 
 
     // Initialise object
@@ -111,7 +111,7 @@ public class Tetris extends JFrame implements GGActListener {
         // Initialise value
         initWithProperties(properties);
         this.gameCallback = gameCallback;
-        blockActionIndex = 0;
+
 
         // Set up the UI components. No need to modify the UI Components
         tetrisComponents = new TetrisComponents();
@@ -120,6 +120,13 @@ public class Tetris extends JFrame implements GGActListener {
         gameGrid1.setSimulationPeriod(getSimulationTime());
 
         this.gameStatistics = new GameStatistics(this);
+        if (isAuto) {
+            this.gameMover = new AutoMover(this);
+        } else {
+            this.gameMover = new PlayerMover(this);
+        }
+
+
         // Add the first block to start
         currentBlock = createRandomTetrisBlock();
         gameGrid1.addActor(currentBlock, new Location(6, 0));
@@ -147,11 +154,15 @@ public class Tetris extends JFrame implements GGActListener {
 
         // If the game is in auto test mode, then the block will be moved according to the blockActions
         String currentBlockMove = "";
-        if (blockActions.length > blockActionIndex) {
-            currentBlockMove = blockActions[blockActionIndex];
+        if (isAuto) {
+            if (((AutoMover)gameMover).canAutoPlay()){
+                currentBlockMove = ((AutoMover)gameMover).getCurrentBlockMove();
+            }
         }
 
-        blockActionIndex++;
+
+
+
         TetrisShape t = null;
         TetrisShape preview = null;
         int rnd;
@@ -219,9 +230,7 @@ public class Tetris extends JFrame implements GGActListener {
 
                 break;
         }
-        if (isAuto) {
-            t.setAutoBlockMove(currentBlockMove);
-        }
+
         preview.display(gameGrid2, new Location(2, 1));
         blockPreview = preview;
         gameStatistics.addShapeCnt(preview.getShape().ordinal());
@@ -249,35 +258,16 @@ public class Tetris extends JFrame implements GGActListener {
     void setCurrentTetrisBlock(Actor t) {
         gameCallback.changeOfBlock(currentBlock);
         currentBlock = t;
-    }
-
-    // Handle user input to move block. Arrow left to move left, Arrow right to move right, Arrow up to rotate and
-    // Arrow down for going down
-    private void moveBlock(int keyEvent) {
-        switch (keyEvent) {
-            case KeyEvent.VK_UP:
-                if (difficulty != GameMode.MADNESS) {
-                    ((TetrisShape) currentBlock).rotate();
-                }
-                break;
-            case KeyEvent.VK_LEFT:
-                ((TetrisShape) currentBlock).left();
-                break;
-            case KeyEvent.VK_RIGHT:
-                ((TetrisShape) currentBlock).right();
-                break;
-            case KeyEvent.VK_DOWN:
-                ((TetrisShape) currentBlock).drop();
-                break;
-            default:
-                return;
+        if (isAuto) {
+            ((AutoMover) gameMover).iterShapeIndex();
         }
     }
 
 
+
     public void act(){
         removeFilledLine();
-        moveBlock(gameGrid1.getKeyCode());
+        gameMover.moveBlock((TetrisShape) currentBlock, ((Integer)gameGrid1.getKeyCode()).toString());
     }
     private void removeFilledLine() {
         for (int y = 0; y < gameGrid1.nbVertCells; y++) {
@@ -336,7 +326,7 @@ public class Tetris extends JFrame implements GGActListener {
         EventQueue.invokeLater(() -> scoreText.setText(score + " points"));
     }
 
-    void gameOver() throws IOException {
+    public void gameOver() throws IOException {
         gameGrid1.addActor(new Actor("sprites/gameover.gif"), new Location(5, 5));
         gameGrid1.doPause();
 
@@ -357,13 +347,17 @@ public class Tetris extends JFrame implements GGActListener {
         gameGrid1.refresh();
         gameGrid2.refresh();
         gameGrid2.delay(getDelayTime());
-        blockActionIndex = 0;
         currentBlock = createRandomTetrisBlock();
+        if (isAuto) {
+            gameMover = new AutoMover(this);
+        } else {
+            gameMover = new PlayerMover(this);
+        }
         gameGrid1.addActor(currentBlock, new Location(6, 0));
         gameGrid1.doRun();
         gameGrid1.requestFocus();
         showScore(gameStatistics.getScore());
-        slowDown = 5;
+        slowDown = baseSlowDown;
 
     }
 
@@ -404,6 +398,14 @@ public class Tetris extends JFrame implements GGActListener {
 
     public GameMode getDifficulty(){
         return this.difficulty;
+    }
+
+    public GameMover getGameMover(){
+        return this.gameMover;
+    }
+
+    public String[] getBlockActions(){
+        return this.blockActions;
     }
 
 }

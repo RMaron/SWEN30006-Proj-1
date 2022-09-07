@@ -9,11 +9,7 @@ class S extends TetrisShape {
   private static final Tetris.Shape s = Tetris.Shape.S_SHAPE;
 
   S(Tetris tetris){
-    super();
-
-
-    this.shape = s;
-    this.tetris = tetris;
+    super(tetris, s);
 
     // rotId 0
     Location[][] r = new Location[4][4];
@@ -38,7 +34,7 @@ class S extends TetrisShape {
     r[3][3] = new Location(new Location(1, 1));
 
     for (int i = 0; i < r.length; i++)
-      blocks.add(new TetroBlock(this.shape.ordinal(), r[i]));
+      this.addBlocks(new TetroBlock(this.getShape().ordinal(), r[i]));
   }
 
 }

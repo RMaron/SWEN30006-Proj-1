@@ -10,10 +10,8 @@ class L extends TetrisShape {
 
 
   L(Tetris tetris) {
-    super();
+    super(tetris, s);
 
-    this.shape = s;
-    this.tetris = tetris;
     // rotId 0
     Location[][] r = new Location[4][4];
     r[0][0] = new Location(new Location(1, 0));
@@ -37,6 +35,6 @@ class L extends TetrisShape {
     r[3][3] = new Location(new Location(1, 1));
 
     for (int i = 0; i < r.length; i++)
-      blocks.add(new TetroBlock(this.shape.ordinal(), r[i]));
+      this.addBlocks(new TetroBlock(this.getShape().ordinal(), r[i]));
   }
 }
