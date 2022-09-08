@@ -1,5 +1,8 @@
 // Q.java
 
+// Raziel Maron, Chi Pang Kuok, Sandeepa Andra Hennadige
+// Group 4
+
 import ch.aplu.jgamegrid.*;
 
 import java.util.ArrayList;
@@ -12,7 +15,9 @@ class Q extends TetrisShape {
     Q(Tetris tetris) {
         super(tetris, s);
 
+        // 4 block shape, 4 rotation directions
         Location[][] r = new Location[5][4];
+
         // rotId 0
         r[0][0] = new Location(new Location(-1, -1));
         r[1][0] = new Location(new Location(-1, 0));

@@ -1,5 +1,8 @@
 // Plus.java
 
+// Raziel Maron, Chi Pang Kuok, Sandeepa Andra Hennadige
+// Group 4
+
 import ch.aplu.jgamegrid.*;
 
 import java.util.ArrayList;
@@ -11,7 +14,9 @@ class Plus extends TetrisShape {
     Plus(Tetris tetris) {
         super(tetris, s);
 
+        // 5 block shape, 4 rotation directions
         Location[][] r = new Location[5][4];
+
         // rotId 0
         r[0][0] = new Location(new Location(-1, 0));
         r[1][0] = new Location(new Location(0, 0));

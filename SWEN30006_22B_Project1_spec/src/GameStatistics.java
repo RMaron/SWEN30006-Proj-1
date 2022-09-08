@@ -1,3 +1,9 @@
+// GameStatistics.java
+
+// Raziel Maron, Chi Pang Kuok, Sandeepa Andra Hennadige
+// Group 4
+
+
 import javax.swing.*;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -35,10 +41,12 @@ public class GameStatistics extends JFrame {
         this.score += i;
     }
 
+    // Update each round once complete, Write game stats to file,
+    //  and prepare for next round
     public void roundUpdate() throws IOException{
         this.totalScore += this.score;
         this.shapeCntList.add(Arrays.copyOf(this.shapeCnt, this.shapeCnt.length));
-        this.scoreList.add((Integer) this.score);
+        this.scoreList.add(this.score);
         writeFile();
         Arrays.fill(this.shapeCnt, 0);
         this.round += 1;
@@ -46,6 +54,7 @@ public class GameStatistics extends JFrame {
     }
 
 
+    // write game stats to file
     public void writeFile() throws IOException {
 
         FileWriter fw = new  FileWriter("statistics.txt");

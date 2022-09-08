@@ -1,5 +1,8 @@
 // TetroBlock.java
 
+// Raziel Maron, Chi Pang Kuok, Sandeepa Andra Hennadige
+// Group 4
+
 import ch.aplu.jgamegrid.*;
 
 public class TetroBlock extends Actor
@@ -8,6 +11,7 @@ public class TetroBlock extends Actor
   // Display a single square in a Tetris piece
   public TetroBlock(int blockId, Location[] relLoc)
   {
+    // loop over sprites for tetris madness
     super("sprites/tetroblock" + (blockId%7)+ ".gif");
     this.relLoc = relLoc.clone();
   }

@@ -1,8 +1,9 @@
+//GameMover.java
 
+// Raziel Maron, Chi Pang Kuok, Sandeepa Andra Hennadige
+// Group 4
 
-import javax.swing.*;
-
-public abstract class GameMover extends JFrame  {
+public abstract class GameMover {
 
     private final Tetris tetris;
 

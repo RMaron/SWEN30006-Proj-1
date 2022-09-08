@@ -1,32 +1,32 @@
 // Tetris.java
 
+// Raziel Maron, Chi Pang Kuok, Sandeepa Andra Hennadige
+// Group 4
+
 import ch.aplu.jgamegrid.*;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.FileWriter;
-import java.io.IOException;
+
+
 import java.security.Key;
+import java.io.IOException;
 import java.util.*;
-import java.awt.event.KeyEvent;
 import java.awt.*;
-import java.util.List;
 import javax.swing.*;
 
 public class Tetris extends JFrame implements GGActListener {
 
-    private Actor currentBlock = null;  // Currently active block
-    private Actor blockPreview = null;   // block in preview window
+    private TetrisShape currentBlock = null;  // Currently active block
+    private TetrisShape blockPreview = null;   // block in preview window
     private static final int baseSlowDown = 5;
     private int slowDown;
     private Random random = new Random(0);
     private GameMode difficulty;
     private GameMover gameMover;
 
-    private TetrisGameCallback gameCallback;
+    private final TetrisGameCallback gameCallback;
 
     private boolean isAuto = false;
-    private GameStatistics gameStatistics;
+    private final GameStatistics gameStatistics;
 
 
     private int seed = 30006;
@@ -67,10 +67,23 @@ public class Tetris extends JFrame implements GGActListener {
             }
             return null;
         }
+
+        // get number of Shape types for each difficulty
+        public int getNumPieces(){
+            switch (this){
+                case MEDIUM:
+                case MADNESS:
+                    return 10;
+                default:
+                    return 7;
+            }
+
+        }
     }
 
 
-    // Enum of shapes, value = shape ID
+    // Enum of shapes, ordinal = shape ID
+    // *** Maintain current order ***
     public enum Shape{
         I_SHAPE ("I"),
         J_SHAPE ("J"),
@@ -137,46 +150,23 @@ public class Tetris extends JFrame implements GGActListener {
         setTitle("SWEN30006 Tetris Madness");
 
         showScore(gameStatistics.getScore());
+        slowDown = baseSlowDown;
 
-        switch (difficulty){
-            case MEDIUM:
-                slowDown = (int)(0.8*baseSlowDown);
-                break;
-            default:
-                slowDown = baseSlowDown;
-        }
     }
 
     // create a block and assign to a preview mode
-    Actor createRandomTetrisBlock() {
+    TetrisShape createRandomTetrisBlock() {
         if (blockPreview != null)
             blockPreview.removeSelf();
-
-        // If the game is in auto test mode, then the block will be moved according to the blockActions
-        String currentBlockMove = "";
-        if (isAuto) {
-            if (((AutoMover)gameMover).canAutoPlay()){
-                currentBlockMove = ((AutoMover)gameMover).getCurrentBlockMove();
-            }
-        }
-
-
 
 
         TetrisShape t = null;
         TetrisShape preview = null;
-        int rnd;
-        // Handles difficulty scaling for number of pieces
-        switch (difficulty) {
-            case MEDIUM:
-            case MADNESS:
-                rnd = random.nextInt(10);
-                break;
-            default:
-                rnd = random.nextInt(7);
-                break;
-        }
-        // Spawn random piece
+
+        // Generates random number based on number of pieces based on difficulty
+        int rnd = random.nextInt(difficulty.getNumPieces());
+
+        // Spawn random piece + preview
         Shape s = Shape.findShape(rnd);
         switch (s) {
             case I_SHAPE:
@@ -231,18 +221,21 @@ public class Tetris extends JFrame implements GGActListener {
                 break;
         }
 
+        // Show preview tetrisBlock
         preview.display(gameGrid2, new Location(2, 1));
         blockPreview = preview;
         gameStatistics.addShapeCnt(preview.getShape().ordinal());
-        // Show preview tetrisBlock
 
         // Set speed with respect to difficulty
         switch (difficulty){
             case MEDIUM:
+                // set speed 20% faster than easy
                 t.setSlowDown((int)(0.8*slowDown));
                 break;
             case MADNESS:
-                int rand = slowDown - random.nextInt(slowDown+1);
+                // set random speed between slow down and 1/2 slow down
+                int rand = slowDown - random.nextInt(slowDown/2+1);
+
                 t.setSlowDown(rand);
                 break;
             default:
@@ -252,10 +245,7 @@ public class Tetris extends JFrame implements GGActListener {
     }
 
 
-
-
-
-    void setCurrentTetrisBlock(Actor t) {
+    void setCurrentTetrisBlock(TetrisShape t) {
         gameCallback.changeOfBlock(currentBlock);
         currentBlock = t;
         if (isAuto) {
@@ -264,11 +254,12 @@ public class Tetris extends JFrame implements GGActListener {
     }
 
 
-
     public void act(){
         removeFilledLine();
         gameMover.moveBlock((TetrisShape) currentBlock, ((Integer)gameGrid1.getKeyCode()).toString());
     }
+
+
     private void removeFilledLine() {
         for (int y = 0; y < gameGrid1.nbVertCells; y++) {
             boolean isLineComplete = true;
@@ -298,6 +289,7 @@ public class Tetris extends JFrame implements GGActListener {
                 gameCallback.changeOfScore(gameStatistics.getScore());
                 showScore(gameStatistics.getScore());
                 // Set speed of tetrisBlocks
+                // include redundancy in score checking in case adding scores>1 is possible in future implementation
                 if (prevScore <=10 && gameStatistics.getScore() > 10) {
                     slowDown -= 1;
                 }
@@ -320,8 +312,8 @@ public class Tetris extends JFrame implements GGActListener {
         }
     }
 
-    // Show Score and Game Over
 
+    // Show Score and Game Over
     private void showScore(final int score) {
         EventQueue.invokeLater(() -> scoreText.setText(score + " points"));
     }
@@ -361,6 +353,7 @@ public class Tetris extends JFrame implements GGActListener {
 
     }
 
+
     // Different speed for manual and auto mode
     private int getSimulationTime() {
         if (isAuto) {
@@ -370,6 +363,7 @@ public class Tetris extends JFrame implements GGActListener {
         }
     }
 
+
     private int getDelayTime() {
         if (isAuto) {
             return 200;
@@ -377,6 +371,7 @@ public class Tetris extends JFrame implements GGActListener {
             return 2000;
         }
     }
+
 
     // AUTO GENERATED - do not modify//GEN-BEGIN:variables
     public ch.aplu.jgamegrid.GameGrid gameGrid1;
@@ -391,6 +386,9 @@ public class Tetris extends JFrame implements GGActListener {
     public javax.swing.JButton startBtn;
     private TetrisComponents tetrisComponents;
     // End of variables declaration//GEN-END:variables
+
+
+    // basic getters
 
     public String getDifficultyStr(){
         return this.difficulty.str;

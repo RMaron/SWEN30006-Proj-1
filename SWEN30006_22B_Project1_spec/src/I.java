@@ -1,5 +1,8 @@
 // I.java
 
+// Raziel Maron, Chi Pang Kuok, Sandeepa Andra Hennadige
+// Group 4
+
 import ch.aplu.jgamegrid.*;
 
 import java.util.ArrayList;
@@ -13,8 +16,10 @@ class I extends TetrisShape {
   I(Tetris tetris) {
     super(tetris, s);
 
-    // rotId 0
+    // 4 block shape, 4 rotation directions
     Location[][] r = new Location[4][4];
+
+    // rotId 0
     r[0][0] = new Location(new Location(-1, 0));
     r[1][0] = new Location(new Location(0, 0));
     r[2][0] = new Location(new Location(1, 0));

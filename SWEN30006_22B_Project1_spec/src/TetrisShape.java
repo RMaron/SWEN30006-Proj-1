@@ -1,3 +1,9 @@
+// TetrisShape.java
+
+// Raziel Maron, Chi Pang Kuok, Sandeepa Andra Hennadige
+// Group 4
+
+
 import ch.aplu.jgamegrid.*;
 
 import java.io.IOException;
@@ -6,17 +12,17 @@ import java.util.Arrays;
 
 public abstract class TetrisShape extends Actor{
 
-    private Tetris.Shape shape;
+    private final Tetris.Shape shape;
 
-    private Tetris tetris;
+    private final Tetris tetris;
     private boolean isStarting=true;
     private int rotId = 0;
     private int nb=0;
 
 
 
-    private ArrayList<TetroBlock> blocks = new ArrayList<TetroBlock>();
-    private Actor nextTetrisBlock;
+    private final ArrayList<TetroBlock> blocks = new ArrayList<TetroBlock>();
+    private TetrisShape nextTetrisBlock;
 
     TetrisShape(Tetris tetris, Tetris.Shape shape){
         this.tetris = tetris;
